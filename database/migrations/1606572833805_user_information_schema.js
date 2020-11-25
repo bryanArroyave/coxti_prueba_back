@@ -6,10 +6,11 @@ const Schema = use('Schema')
 class UserInformationSchema extends Schema {
   up () {
     this.create('user_informations', (table) => {
-      table.increments()
-      table.string('category_item_id').unsigned().references('id').inTable('category_items')
-      table.integer('user_id').notNullable();
-      table.string('data', 100).nostNullabler()
+      
+      table.integer('category_item_id').unsigned().references('id').inTable('category_items')
+      table.integer('user_id').unsigned().references('id').inTable('users')
+      table.string('data', 100).notNullable()
+      table.primary(["user_id", "category_item_id"])
       table.timestamps()
     })
   }

@@ -9,6 +9,7 @@ class CategoryItemSchema extends Schema {
       table.increments()
       table.integer('category_id').unsigned().references('id').inTable('categories')
       table.string('name', 100).notNullable()
+      table.boolean("required")
       table.timestamps()
     })
   }

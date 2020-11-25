@@ -5,13 +5,14 @@ const CategoryModel = use("App/Models/Category")
 class CategoryService{
 
 
-    async create({name}){
-    try{    
-        const category = {name};
-        const Category = await CategoryModel.create(category);
-        return {error: false, payload: Category, msg: 'Insertado con exito' };
+    async get(){
+
+        try {
+            const  category = await CategoryModel.all()
+            return {error: false, payload: category, msg: '' };
         } catch (error) {
-        return {error : true, msg: error};
+            console.log(error);
+            return {error : true, msg: error};
         }
     }
 }
