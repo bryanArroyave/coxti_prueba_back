@@ -11,7 +11,6 @@ class AuthController {
             const user_items = req.body
            
             const user = await UserService.singin(user_items);
-            return res.send(user)
             return user.error ? res.badRequest(user): res.ok(user);
           } catch (error) {
             return res.internalServerError(error);
