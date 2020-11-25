@@ -28,4 +28,18 @@ Route.group(() => {
 
 Route.group(() => {
   Route.post("/singin", "AuthController.singin");
+  Route.post("/login", "AuthController.login");
+  Route.post("/logout/:id", "AuthController.logout");
+  Route.get("/get/:id", "AuthController.getUser");
 }).prefix("api/auth");
+
+
+Route.group(()=>{
+  Route.get("/:id", "CategoryController.get" )
+  Route.get("", "CategoryController.getAll" )
+  Route.get("/:id/item", "CategoryController.getAllItems" )
+  Route.get("/:id/item/:item_id", "CategoryController.get" )
+  
+}).prefix("api/category")
+
+

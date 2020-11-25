@@ -1,35 +1,65 @@
-const { create } = require("./CategoryItemService");
-
 const UserModel = use("App/Models/User");
+const TokenModel = use("App/Models/Token");
 const UserInformationService = use("App/Services/UserInformationService");
 const CategoryItemService = use("App/Services/CategoryItemService");
-const CategoryService = use("App/Services/CategoryService");
+const Encryption = use("Encryption");
 
 const Env = use("Env");
 
 class UserService {
-  async getPassword(userInformation_array) {
-    const password_id = Env.get("ID_PASSWORD");
-    for (const info of userInformation_array) {
-      if (info.category_item_id == password_id) return info.data;
+  async getUser(auth) {
+    try {
+      return await auth.getUser();
+    } catch (error) {
+      return null;
     }
-
-    return null;
   }
 
-  async getEmail(userInformation_array) {
-    const password_id = Env.get("ID_EMAIL");
-    for (const info of userInformation_array) {
-      if (info.category_item_id == password_id) return info.data;
+  async check(auth) {
+    try {
+      return await auth.check();
+    } catch (error) {
+      return null;
     }
-
-    return null;
   }
-
   //Routes
-  async login({ email, password }) {}
+  async login({ email, password }, auth) {
+    try {
+      const user = await this.get(email);
+      const { id } = user["$attributes"];
+      if (!(await this.isLogged(id))) {
+        const token = await auth.withRefreshToken().attempt(email, password);
+        return {
+          error: false,
+          payload: token,
+          msg: "user was logged",
+        };
+      } else {
+        return { error: true, payload: null, msg: "user is logged already" };
+      }
+    } catch (error) {
+      console.log(error);
+      return { error: true, payload: null, msg: error + "" };
+    }
+  }
 
-  async logout({ user_id }) {}
+  async logout(auth) {
+    try {
+      const user = await auth.getUser();
+
+      const token_deleted = await user
+        .tokens()
+        .where("type", "jwt_refresh_token")
+        .delete();
+
+      if (token_deleted)
+        return { error: false, payload: null, msg: "user was logged out" };
+      else return { error: true, payload: null, msg: "user is logged already" };
+    } catch (error) {
+      console.log(error);
+      return { error: true, payload: null, msg: error + "" };
+    }
+  }
 
   async singin(user_information) {
     const userInformation_array = [];
@@ -72,10 +102,33 @@ class UserService {
       }
       return { error, payload: payload_data, msg };
     } catch (error) {
+      console.log(error);
       return { error: true, payload: null, msg: error.sqlMessage };
     }
   }
 
+  async get(email) {
+    const user = await UserModel.findBy("email", email);
+    return user;
+  }
+
+  async getUserByEmail(email) {
+    try {
+      const user = await UserModel.query().where("email", "=", email).fetch();
+
+      if (user.rows.length > 0)
+        return { error: false, payload: user.rows[0], msg: "user" };
+      else
+        return {
+          error: true,
+          payload: [],
+          msg: "email " + email + " doesn't exists",
+        };
+    } catch (error) {
+      console.log(error);
+      return { error: true, msg: error };
+    }
+  }
   async createUser(user, userInformation_array) {
     try {
       console.log(user);
@@ -114,8 +167,24 @@ class UserService {
 
     return null;
   }
-  async singout({ user_id }) {}
 
+  async getPassword(userInformation_array) {
+    const password_id = Env.get("ID_PASSWORD");
+    for (const info of userInformation_array) {
+      if (info.category_item_id == password_id) return info.data;
+    }
+
+    return null;
+  }
+
+  async getEmail(userInformation_array) {
+    const password_id = Env.get("ID_EMAIL");
+    for (const info of userInformation_array) {
+      if (info.category_item_id == password_id) return info.data;
+    }
+
+    return null;
+  }
   //Internal
 
   async valitdateInfo(id, data) {
@@ -132,6 +201,19 @@ class UserService {
     return true;
   }
 
+  async getTokens(user_id) {
+    try {
+      const user = await TokenModel.findBy("user_id", user_id);
+
+      return user;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  async isLogged(user_id) {
+    return (await this.getTokens(user_id)) != null;
+  }
   //Other Validations here
 }
 
