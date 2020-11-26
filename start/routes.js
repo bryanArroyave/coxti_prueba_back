@@ -23,23 +23,24 @@ Route.get("/", () => {
 Route.group(() => {
   Route.post("/", "UserInformationController.create").validator(
     "UserInformation"
-  );
-}).prefix("api/userinformation");
+  );  
+  Route.get("/", "UserInformationController.get");
+})
+  .prefix("api/userinformation")
+ .middleware(["auth"]);
 
 Route.group(() => {
   Route.post("/singin", "AuthController.singin");
   Route.post("/login", "AuthController.login");
-  Route.post("/logout/:id", "AuthController.logout");
+  Route.post("/logout", "AuthController.logout");
   Route.get("/get/:id", "AuthController.getUser");
 }).prefix("api/auth");
 
-
-Route.group(()=>{
-  Route.get("/:id", "CategoryController.get" )
-  Route.get("", "CategoryController.getAll" )
-  Route.get("/:id/item", "CategoryController.getAllItems" )
-  Route.get("/:id/item/:item_id", "CategoryController.get" )
-  
-}).prefix("api/category")
-
-
+Route.group(() => {
+  Route.get("/:id", "CategoryController.get");
+  Route.get("", "CategoryController.getAll");
+  Route.get("/:id/item", "CategoryController.getAllItems");
+  Route.get("/:id/item/:item_id", "CategoryController.get");
+})
+  .prefix("api/category")
+ // .middleware(["auth"]);

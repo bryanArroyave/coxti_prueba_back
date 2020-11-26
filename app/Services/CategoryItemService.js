@@ -5,7 +5,6 @@ class CategoryItemService {
     try {
       const category_item = await CategoryItemModel.query()
         .where("category_id", "=", category_id)
-
         .fetch();
 
       if (category_item.rows.length > 0)

@@ -2,7 +2,6 @@ const UserModel = use("App/Models/User");
 const TokenModel = use("App/Models/Token");
 const UserInformationService = use("App/Services/UserInformationService");
 const CategoryItemService = use("App/Services/CategoryItemService");
-const Encryption = use("Encryption");
 
 const Env = use("Env");
 
@@ -26,6 +25,8 @@ class UserService {
   async login({ email, password }, auth) {
     try {
       const user = await this.get(email);
+      console.log(email);
+      console.log(user);
       const { id } = user["$attributes"];
       if (!(await this.isLogged(id))) {
         const token = await auth.withRefreshToken().attempt(email, password);
@@ -46,7 +47,7 @@ class UserService {
   async logout(auth) {
     try {
       const user = await auth.getUser();
-
+ 
       const token_deleted = await user
         .tokens()
         .where("type", "jwt_refresh_token")
@@ -54,7 +55,7 @@ class UserService {
 
       if (token_deleted)
         return { error: false, payload: null, msg: "user was logged out" };
-      else return { error: true, payload: null, msg: "user is logged already" };
+      else return { error: true, payload: null, msg: "user is logged out already" };
     } catch (error) {
       console.log(error);
       return { error: true, payload: null, msg: error + "" };

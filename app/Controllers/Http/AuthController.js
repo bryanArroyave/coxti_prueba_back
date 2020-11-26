@@ -5,7 +5,11 @@ const UserService = use("App/Services/UserService");
 class AuthController {
   async singin({ response: res, request: req }) {
     try {
-      const user_items = req.body;
+      const user_items = req.body.data;
+
+      console.log(user_items);
+
+     
       const user = await UserService.singin(user_items);
       return user.error ? res.badRequest(user) : res.ok(user);
     } catch (error) {
